@@ -1,0 +1,6 @@
+# Ignore configuration and generated files
+config.json
+__pycache__/
+vault/
+*.otf
+*.db

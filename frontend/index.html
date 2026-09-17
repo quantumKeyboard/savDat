@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="1">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>saveDat Archives</title>
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     APP SHELL
+══════════════════════════════════════════════════ -->
+<div class="app-shell">
+
+  <!-- ── Topbar ── -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      saveDat <span>Archives</span>
+    </div>
+
+    <div class="topbar-search">
+      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input id="main-search" type="text" placeholder="Filter items…" oninput="onMainSearch(this.value)">
+    </div>
+
+    <button class="btn btn-sm collections-page-btn" onclick="openCollectionsPage()">Collections</button>
+
+    <div class="topbar-actions">
+      <!-- Theme switcher -->
+      <div class="theme-switcher" title="Switch theme">
+        <button class="theme-dot active" data-t="1" onclick="applyTheme('1')" title="Crimson"></button>
+        <button class="theme-dot" data-t="2" onclick="applyTheme('2')" title="Amber"></button>
+        <button class="theme-dot" data-t="3" onclick="applyTheme('3')" title="Emerald"></button>
+        <button class="theme-dot" data-t="4" onclick="applyTheme('4')" title="Teal"></button>
+        <button class="theme-dot" data-t="5" onclick="applyTheme('5')" title="Steel Blue"></button>
+        <button class="theme-dot" data-t="6" onclick="applyTheme('6')" title="Rose"></button>
+        <button class="theme-dot" data-t="7" onclick="applyTheme('7')" title="Vermillion"></button>
+      </div>
+
+      <button class="btn btn-sm" onclick="openSettings()" title="Settings">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        Settings
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+
+    <!-- Type tabs -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Browse</div>
+      <div class="type-tabs">
+        <button class="type-tab active" data-type="all" onclick="setActiveType('all')">
+          <span class="type-tab-icon">📚</span> All
+          <span class="type-tab-count" id="count-all">0</span>
+        </button>
+        <button class="type-tab" data-type="movies" onclick="setActiveType('movies')">
+          <span class="type-tab-icon">🎬</span> Movies
+          <span class="type-tab-count" id="count-movies">0</span>
+        </button>
+        <button class="type-tab" data-type="tv" onclick="setActiveType('tv')">
+          <span class="type-tab-icon">📺</span> TV Shows
+          <span class="type-tab-count" id="count-tv">0</span>
+        </button>
+        <button class="type-tab" data-type="anime" onclick="setActiveType('anime')">
+          <span class="type-tab-icon">🌸</span> Anime
+          <span class="type-tab-count" id="count-anime">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Collections -->
+    <div class="sidebar-section collections-sidebar-section">
+      <div class="sidebar-label">Collections</div>
+      <div class="collections-list" id="collections-list">
+        <div style="font-size:0.75rem;opacity:0.4;padding:8px 4px">Loading…</div>
+      </div>
+      <button class="new-collection-btn" onclick="openCreateCollection()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Collection
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main-content">
+
+    <!-- API key warning -->
+    <div id="config-warning" class="config-warning" style="display:none;margin:16px 28px 0;border-radius:5px">
+      <span>⚠️</span>
+      <div>
+        <strong style="font-family:var(--font-head)">TMDB API key not set.</strong><br>
+        <span style="font-size:0.75rem;opacity:0.8">
+          Go to <a href="https://www.themoviedb.org/settings/api" target="_blank" style="color:var(--main)">themoviedb.org</a>
+          to get a free key, then add it in <button onclick="openSettings()" style="background:none;border:none;color:var(--main);cursor:pointer;font-size:inherit;font-family:inherit;padding:0">Settings</button>.
+        </span>
+      </div>
+    </div>
+
+    <!-- View header -->
+    <div class="view-header">
+      <div>
+        <h1 class="view-title" id="view-title">saveDat</h1>
+        <span id="view-subtitle" style="font-size:0.72rem;opacity:0.45;font-family:var(--font-body)"></span>
+      </div>
+      <div class="view-actions">
+        <!-- View toggle -->
+        <div class="view-toggle">
+          <button class="view-toggle-btn active" data-mode="grid" onclick="setViewMode('grid')" title="Grid view">
+            ⊞
+          </button>
+          <button class="view-toggle-btn" data-mode="list" onclick="setViewMode('list')" title="List view">
+            ☰
+          </button>
+        </div>
+        <button class="btn btn-primary btn-sm" id="add-item-btn" onclick="openAddItem()" style="display:none">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Item
+        </button>
+        <button class="btn btn-sm" onclick="openEditCollection()" id="edit-collection-btn" style="display:none">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteCollection()" id="delete-collection-btn" style="display:none">
+          Delete
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters and sorting -->
+    <div class="status-bar">
+      <div class="filter-menu-wrap">
+        <button class="btn btn-sm filter-menu-trigger" id="filter-menu-trigger" onclick="toggleFilterMenu()" aria-expanded="false" aria-controls="filter-menu">
+          Filters <span id="active-filter-count" class="active-filter-count" hidden>0</span> ▾
+        </button>
+        <div class="filter-menu" id="filter-menu" hidden>
+          <div class="filter-menu-section">
+            <span class="filter-menu-label">Status</span>
+            <div class="status-options">
+              <button class="status-chip active" data-status="all" onclick="setActiveStatus('all')">All</button>
+              <button class="status-chip" data-status="watching" onclick="setActiveStatus('watching')">Watching</button>
+              <button class="status-chip" data-status="completed" onclick="setActiveStatus('completed')">Completed</button>
+              <button class="status-chip" data-status="plan_to_watch" onclick="setActiveStatus('plan_to_watch')">Plan to Watch</button>
+              <button class="status-chip" data-status="dropped" onclick="setActiveStatus('dropped')">Dropped</button>
+              <button class="status-chip" data-status="on_hold" onclick="setActiveStatus('on_hold')">On Hold</button>
+            </div>
+          </div>
+          <div class="filter-menu-fields">
+            <label class="filter-select-label">Genre
+              <select id="genre-filter" class="filter-select" onchange="setGenreFilter(this.value)"><option value="all">All genres</option></select>
+            </label>
+            <label class="filter-select-label">Progress
+              <select id="watch-filter" class="filter-select" onchange="setWatchFilter(this.value)">
+                <option value="all">All</option><option value="watched">Watched</option><option value="unwatched">Unwatched</option>
+              </select>
+            </label>
+            <label class="filter-select-label">Rating
+              <select id="rating-filter" class="filter-select" onchange="setRatingFilter(this.value)">
+                <option value="all">Any rating</option><option value="8">8+ rating</option><option value="7">7+ rating</option><option value="6">6+ rating</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </div>
+      <label class="filter-select-label filter-sort-label">Sort
+        <select id="sort-by" class="filter-select" onchange="setSortBy(this.value)">
+          <option value="added-desc">Recently added</option><option value="title-asc">Title A–Z</option><option value="year-desc">Newest release</option><option value="rating-desc">Highest rating</option><option value="rating-asc">Lowest rating</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- Items -->
+    <div class="items-container" id="items-container">
+      <div class="empty-state">
+        <div class="empty-icon">🎬</div>
+        <div class="empty-title">Pick a collection</div>
+        <div class="empty-desc">Select a collection from the sidebar, or create one to get started.</div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination"></div>
+
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     MODAL: Edit Collection
+══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-edit-collection" onclick="if(event.target===this)closeModal('modal-edit-collection')">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">Edit Collection</div>
+      <button class="btn btn-ghost btn-icon btn-sm" onclick="closeModal('modal-edit-collection')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="ec-name">Name</label>
+        <input class="form-input" id="ec-name" type="text" onkeydown="if(event.key==='Enter')submitEditCollection()">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="ec-type">Type</label>
+        <select class="form-input form-select" id="ec-type">
+          <option value="movies">🎬 Movies</option>
+          <option value="tv">📺 TV Shows</option>
+          <option value="anime">🌸 Anime</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Color</label>
+        <div class="color-grid" id="edit-color-grid">
+          <button class="color-swatch" style="background:#FF6669" onclick="selectEditColor(this,'#FF6669')" title="Red"></button>
+          <button class="color-swatch" style="background:#5294FF" onclick="selectEditColor(this,'#5294FF')" title="Blue"></button>
+          <button class="color-swatch" style="background:#E0B700" onclick="selectEditColor(this,'#E0B700')" title="Yellow"></button>
+          <button class="color-swatch" style="background:#04C86D" onclick="selectEditColor(this,'#04C86D')" title="Green"></button>
+          <button class="color-swatch" style="background:#7A83FF" onclick="selectEditColor(this,'#7A83FF')" title="Purple"></button>
+          <button class="color-swatch" style="background:#EB6D00" onclick="selectEditColor(this,'#EB6D00')" title="Orange"></button>
+          <button class="color-swatch" style="background:#FB3290" onclick="selectEditColor(this,'#FB3290')" title="Pink"></button>
+          <button class="color-swatch" style="background:#00BDA7" onclick="selectEditColor(this,'#00BDA7')" title="Teal"></button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-edit-collection')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="submitEditCollection()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     MODAL: Create Collection
+══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-create-collection" onclick="if(event.target===this)closeModal('modal-create-collection')">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">New Collection</div>
+      <button class="btn btn-ghost btn-icon btn-sm" onclick="closeModal('modal-create-collection')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="cc-name">Name</label>
+        <input class="form-input" id="cc-name" type="text" placeholder="e.g. Sci-Fi Favourites"
+               onkeydown="if(event.key==='Enter')submitCreateCollection()">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cc-type">Type</label>
+        <select class="form-input form-select" id="cc-type">
+          <option value="movies">🎬 Movies</option>
+          <option value="tv">📺 TV Shows</option>
+          <option value="anime">🌸 Anime</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Color</label>
+        <div class="color-grid">
+          <button class="color-swatch selected" style="background:#FF6669" onclick="selectColor(this,'#FF6669')" title="Red"></button>
+          <button class="color-swatch" style="background:#5294FF" onclick="selectColor(this,'#5294FF')" title="Blue"></button>
+          <button class="color-swatch" style="background:#E0B700" onclick="selectColor(this,'#E0B700')" title="Yellow"></button>
+          <button class="color-swatch" style="background:#04C86D" onclick="selectColor(this,'#04C86D')" title="Green"></button>
+          <button class="color-swatch" style="background:#7A83FF" onclick="selectColor(this,'#7A83FF')" title="Purple"></button>
+          <button class="color-swatch" style="background:#EB6D00" onclick="selectColor(this,'#EB6D00')" title="Orange"></button>
+          <button class="color-swatch" style="background:#FB3290" onclick="selectColor(this,'#FB3290')" title="Pink"></button>
+          <button class="color-swatch" style="background:#00BDA7" onclick="selectColor(this,'#00BDA7')" title="Teal"></button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-create-collection')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="submitCreateCollection()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     MODAL: Add Item
+══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-add-item" onclick="if(event.target===this)closeModal('modal-add-item')">
+  <div class="modal modal-md">
+    <div class="modal-header">
+      <div class="modal-title">Add to Collection</div>
+      <button class="btn btn-ghost btn-icon btn-sm" onclick="closeModal('modal-add-item')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Type tabs -->
+      <div class="search-type-tabs">
+        <button class="search-type-tab active" data-type="movie" onclick="setSearchType('movie')">🎬 Movies</button>
+        <button class="search-type-tab" data-type="tv" onclick="setSearchType('tv')">📺 TV</button>
+        <button class="search-type-tab" data-type="anime" onclick="setSearchType('anime')">🌸 Anime</button>
+      </div>
+      <!-- Search input -->
+      <input class="form-input" id="add-search" type="text"
+             placeholder="Search by title…" oninput="onSearchInput(this.value)">
+      <!-- Results -->
+      <div id="search-results" style="margin-top:12px;max-height:400px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     MODAL: Item Detail
+══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-detail" onclick="if(event.target===this)closeModal('modal-detail')">
+  <div class="modal modal-lg" style="overflow-y:auto">
+    <div class="modal-header" style="position:sticky;top:0;z-index:10;background:var(--secondary-bg)">
+      <div class="modal-title" id="detail-modal-title">Details</div>
+      <button class="btn btn-ghost btn-icon btn-sm" onclick="closeModal('modal-detail')">✕</button>
+    </div>
+    <div id="modal-detail-inner"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     MODAL: Settings
+══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-settings" onclick="if(event.target===this)closeModal('modal-settings')">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">⚙ Settings</div>
+      <button class="btn btn-ghost btn-icon btn-sm" onclick="closeModal('modal-settings')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">TMDB API Key</label>
+        <input class="form-input" id="s-tmdb-key" type="password" placeholder="Paste your key here">
+        <small style="opacity:0.5;font-size:0.72rem;margin-top:4px;display:block">
+          Free key at <a href="https://www.themoviedb.org/settings/api" target="_blank" style="color:var(--main)">themoviedb.org/settings/api</a>
+        </small>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Obsidian Vault Path</label>
+        <input class="form-input" id="s-vault-path" type="text" placeholder="./vault or /Users/you/Vault/saveDat">
+        <small style="opacity:0.5;font-size:0.72rem;margin-top:4px;display:block">
+          Markdown files for movies, people, and TV shows will be saved here.
+        </small>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Google Font</label>
+        <input class="form-input" id="s-google-font" type="text" placeholder="e.g. Figtree">
+        <small style="opacity:0.5;font-size:0.72rem;margin-top:4px;display:block">Enter a Google Fonts family name. Clear it to return to DM Sans.</small>
+      </div>
+
+      <div style="margin-top:20px;padding:12px;background:var(--bg);border:2px solid var(--border);border-radius:var(--radius)">
+        <div style="font-family:var(--font-head);font-size:0.78rem;font-weight:700;margin-bottom:6px">Database</div>
+        <div style="font-size:0.75rem;opacity:0.6;line-height:1.6">
+          SQLite DB stored at <code>backend/savedat.db</code>.<br>
+          Obsidian MD files auto-generated on add with cast and crew links; genres are saved as tags.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-settings')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     Toast container
+══════════════════════════════════════════════════ -->
+<div class="toast-container" id="toast-container"></div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
