@@ -1,4 +1,4 @@
-# saveDat Archives
+# saveDat 
 
 > Local media tracker for Movies, TV Shows, and Anime — with Obsidian vault integration.
 
